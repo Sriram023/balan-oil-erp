@@ -4,12 +4,8 @@ const ManufacturerSchema = new mongoose.Schema({
   name: { type: String, required: true },
   creditGiven: { type: Number, default: 0 },
   paidAmount: { type: Number, default: 0 },
-  balance: {
-    type: Number,
-    default: function () {
-      return this.creditGiven - this.paidAmount;
-    },
-  },
+  balance: { type: Number, default: 0 },
+
   paymentHistory: {
     type: [
       {
@@ -18,8 +14,9 @@ const ManufacturerSchema = new mongoose.Schema({
         note: String,
       },
     ],
-    default: [], // ✅ ensures it's always an array
+    default: [],
   },
+
   creditHistory: {
     type: [
       {
@@ -28,22 +25,29 @@ const ManufacturerSchema = new mongoose.Schema({
         note: String,
       },
     ],
-    default: [], // ✅ ensures it's always an array
+    default: [],
   },
+
   products: {
-  type: [
-    {
-      name: String,
-      quantity: Number,
-      rate: Number,
-      total: Number,
-      date: String,
-    },
-  ],
-  default: [],
-},
+    type: [
+      {
+        name: String,
+        quantity: Number,
+        rate: Number,
+        total: Number,
+        date: String,
+      },
+    ],
+    default: [],
+  },
 
   createdAt: { type: Date, default: Date.now },
+});
+
+// 🧠 Auto-calculate balance before save
+ManufacturerSchema.pre("save", function (next) {
+  this.balance = this.creditGiven - this.paidAmount;
+  next();
 });
 
 const Manufacturer = mongoose.model("Manufacturer", ManufacturerSchema);

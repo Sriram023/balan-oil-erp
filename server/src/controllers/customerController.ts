@@ -1,6 +1,7 @@
-import Customer from "../models/Customer.js";
+import { Request, Response } from "express";
+import Customer from "../models/customer";
 
-export const getCustomers = async (req, res) => {
+export const getCustomers = async (req: Request, res: Response) => {
   try {
     const customers = await Customer.find();
     res.json(customers);
@@ -10,7 +11,7 @@ export const getCustomers = async (req, res) => {
   }
 };
 
-export const addCustomer = async (req, res) => {
+export const addCustomer = async (req: Request, res: Response) => {
   try {
     const { name, creditGiven, paidAmount } = req.body;
     const newCustomer = new Customer({
