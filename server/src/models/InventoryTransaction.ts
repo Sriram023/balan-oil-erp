@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document } from "mongoose";
 
-export interface IInventoryTransaction extends Document {
+export interface InventoryTransaction extends Document {
   productId: mongoose.Types.ObjectId;
   barcode: string;
   type: "IN" | "OUT" | "ADJUST";
