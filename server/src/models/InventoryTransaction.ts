@@ -1,12 +1,12 @@
 import mongoose, { Schema, Document } from "mongoose";
 
-export interface InventoryTransaction extends Document {
+export interface IInventoryTransaction extends Document {
   productId: mongoose.Types.ObjectId;
   barcode: string;
   type: "IN" | "OUT" | "ADJUST";
   quantity: number;
   reason: "PURCHASE" | "SALE" | "RETURN" | "DAMAGE";
-  linkedCustomerId?: mongoose.Types.ObjectId;
+  note?: string;
   performedBy: "ADMIN" | "STAFF";
   createdAt: Date;
 }
@@ -19,7 +19,11 @@ const InventoryTransactionSchema = new Schema<IInventoryTransaction>(
       required: true,
     },
 
-    barcode: { type: String, required: true, index: true },
+    barcode: {
+      type: String,
+      required: true,
+      index: true,
+    },
 
     type: {
       type: String,
@@ -27,7 +31,10 @@ const InventoryTransactionSchema = new Schema<IInventoryTransaction>(
       required: true,
     },
 
-    quantity: { type: Number, required: true },
+    quantity: {
+      type: Number,
+      required: true,
+    },
 
     reason: {
       type: String,
@@ -35,9 +42,8 @@ const InventoryTransactionSchema = new Schema<IInventoryTransaction>(
       required: true,
     },
 
-    linkedCustomerId: {
-      type: Schema.Types.ObjectId,
-      ref: "Customer",
+    note: {
+      type: String,
     },
 
     performedBy: {
