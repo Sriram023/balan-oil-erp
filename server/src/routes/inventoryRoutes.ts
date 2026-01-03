@@ -4,16 +4,28 @@ import InventoryTransaction from "../models/InventoryTransaction.js";
 
 const router = express.Router();
 
-/**
- * Scan barcode and update stock
- * type = "IN" | "OUT"
- */
+/* ---------------- GET ALL PRODUCTS ---------------- */
+router.get("/product", async (_req, res) => {
+  try {
+    const products = await Product.find().sort({ createdAt: -1 });
+    res.json(products);
+  } catch (err) {
+    console.error("Fetch products error:", err);
+    res.status(500).json({ error: "Failed to fetch products" });
+  }
+});
+
+/* ---------------- BARCODE SCAN ---------------- */
+/*
+  type: IN | OUT | ADJUST
+  reason: PURCHASE | SALE | RETURN | DAMAGE
+*/
 router.post("/scan", async (req, res) => {
   try {
-    const { barcode, quantity, type, note } = req.body;
+    const { barcode, quantity, type, reason, note } = req.body;
 
-    if (!barcode || !quantity || !type) {
-      return res.status(400).json({ error: "Missing fields" });
+    if (!barcode || !quantity || !type || !reason) {
+      return res.status(400).json({ error: "Missing required fields" });
     }
 
     const product = await Product.findOne({ barcode });
@@ -25,23 +37,26 @@ router.post("/scan", async (req, res) => {
       return res.status(400).json({ error: "Insufficient stock" });
     }
 
-    // 🔁 Update stock
-    product.stock += type === "IN" ? quantity : -quantity;
+    // Update stock
+    if (type === "IN") product.stock += quantity;
+    if (type === "OUT") product.stock -= quantity;
+
     await product.save();
 
-    // 🧾 Log transaction
-    await InventoryTransaction.create({
+    const transaction = await InventoryTransaction.create({
       productId: product._id,
       barcode: product.barcode,
       quantity,
       type,
-      stockAfter: product.stock,
+      reason,
       note,
+      performedBy: "ADMIN",
     });
 
     res.json({
-      message: "Stock updated successfully",
+      message: "✅ Inventory updated",
       product,
+      transaction,
     });
   } catch (err) {
     console.error("Inventory scan error:", err);
