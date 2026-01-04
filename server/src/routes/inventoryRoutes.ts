@@ -63,5 +63,25 @@ router.post("/scan", async (req, res) => {
     res.status(500).json({ error: "Inventory scan failed" });
   }
 });
+// Get all products with stock
+router.get("/products", async (_req, res) => {
+  try {
+    const products = await Product.find().sort({ updatedAt: -1 });
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch products" });
+  }
+});
 
+// Get inventory transactions
+router.get("/transactions", async (_req, res) => {
+  try {
+    const txns = await InventoryTransaction.find()
+      .sort({ createdAt: -1 })
+      .limit(100);
+    res.json(txns);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch inventory history" });
+  }
+});
 export default router;
